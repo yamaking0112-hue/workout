@@ -95,6 +95,8 @@ main{padding-bottom:140px}
 .regin input{flex:1;min-width:0;min-height:44px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 10px}
 .regin select{min-height:44px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 6px}
 .regin button{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:700}
+.gl{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+.gl input{display:block;width:100%;min-height:44px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 10px}
 </style>
 </head>
 <body>
@@ -129,6 +131,13 @@ main{padding-bottom:140px}
   <div id="vData" class="menu" hidden>
     <section class="ex"><h2>バックアップ</h2><p>記録をテキストとしてコピーし、メモアプリなどに保存してください。</p><textarea id="bk" readonly rows="5"></textarea><button class="add" id="bkCopy">コピーする</button><div class="sum" id="bkMsg"></div></section>
     <section class="ex"><h2>復元</h2><p>保存したテキストを貼り付けて読み込みます。今の記録は置き換わります。</p><textarea id="rs" rows="5" placeholder="ここに貼り付け"></textarea><button class="add" id="rsGo">読み込む</button><div class="sum" id="rsMsg"></div></section>
+    <section class="ex"><h2>GitHubに自動保存</h2><p>記録を入力すると、自分のGitHubの非公開リポジトリに自動で保存します。GitHubにすでに記録がある場合は、新しいほうが読み込まれます。</p>
+      <label class="gl">リポジトリ（ユーザー名/リポジトリ名）<input id="ghRepo" placeholder="ユーザー名/workout-data" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="gl">アクセストークン<input id="ghTok" type="password" placeholder="github_pat_..." autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <button class="add" id="ghOn" style="margin-top:10px">接続する</button>
+      <button class="add" id="ghNow" style="margin-top:8px">今すぐ同期</button>
+      <button class="add" id="ghOff" style="margin-top:8px;color:var(--warn)">連携を解除</button>
+      <div class="sum" id="ghMsg"></div></section>
   </div>
 </main>
 <div class="timer" id="timer">
@@ -138,7 +147,7 @@ main{padding-bottom:140px}
 <script>
 var S={log:{}};
 try{var r=localStorage.getItem('workout-log-v1');if(r)S=JSON.parse(r)}catch(e){}
-function save(){try{localStorage.setItem('workout-log-v1',JSON.stringify(S))}catch(e){}}
+function save(){S.updated=Date.now();try{localStorage.setItem('workout-log-v1',JSON.stringify(S))}catch(e){}if(window.ghQueue)ghQueue()}
 function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 var cur=ymd(new Date()),pend=null;
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -396,6 +405,68 @@ document.getElementById('timer').addEventListener('click',e=>{var b=e.target.clo
   else{stopT(false);tLeft=0}
   tShow();setGo()});
 render();
+var GH=null,GHF='workout-data.json',ghT=null,ghBusy=false,ghDirty=false;
+try{GH=JSON.parse(localStorage.getItem('workout-gh')||'null')}catch(e){}
+function ghSave(){try{if(GH)localStorage.setItem('workout-gh',JSON.stringify(GH));else localStorage.removeItem('workout-gh')}catch(e){}}
+function ghStat(t){var el=document.getElementById('ghMsg');if(el)el.textContent=t}
+function ghFill(){document.getElementById('ghRepo').value=GH?GH.repo:'';document.getElementById('ghTok').placeholder=GH?'（保存済み）':'github_pat_...'}
+function ghHead(){return {'Authorization':'Bearer '+GH.token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}}
+function ghUrl(){return 'https://api.github.com/repos/'+GH.repo+'/contents/'+GHF}
+async function ghGet(){
+  var r=await fetch(ghUrl(),{headers:ghHead(),cache:'no-store'});
+  if(r.status===404)return {sha:null,data:null};
+  if(!r.ok)throw new Error(String(r.status));
+  var j=await r.json();
+  return {sha:j.sha,data:JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g,'')))))};
+}
+async function ghPut(sha){
+  var body={message:'update '+new Date().toISOString(),content:btoa(unescape(encodeURIComponent(JSON.stringify(S))))};
+  if(sha)body.sha=sha;
+  var r=await fetch(ghUrl(),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},ghHead()),body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(String(r.status));
+  var j=await r.json();GH.sha=j.content.sha;ghSave();
+}
+function ghErr(e){var m=e&&e.message;
+  ghStat(m==='401'?'トークンが正しくないか、期限が切れています。':m==='403'?'権限がありません。トークンの設定を確認してください。':m==='404'?'リポジトリが見つかりません。名前と、トークンの対象リポジトリを確認してください。':'通信できませんでした。通信できたときに自動で再送します。')}
+function ghTime(){var d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')}
+function ghQueue(){if(!GH||!GH.token)return;ghDirty=true;clearTimeout(ghT);ghT=setTimeout(ghPush,3000);ghStat('保存待ち…')}
+async function ghPush(){
+  if(!GH||!GH.token)return;
+  if(ghBusy){ghT=setTimeout(ghPush,2000);return}
+  ghBusy=true;ghDirty=false;
+  try{
+    try{await ghPut(GH.sha)}catch(e){if(e.message==='409'||e.message==='422'){var g=await ghGet();await ghPut(g.sha)}else throw e}
+    ghStat('自動保存しました（'+ghTime()+'）');
+  }catch(e){ghDirty=true;ghErr(e)}
+  ghBusy=false;
+}
+async function ghStart(){
+  if(!GH||!GH.token)return;
+  try{
+    var g=await ghGet();
+    if(!g.data){await ghPut(null);ghStat('接続しました。記録を保存しました（'+ghTime()+'）');return}
+    GH.sha=g.sha;ghSave();
+    var ru=g.data.updated||0,lu=S.updated||0;
+    if(ru>lu){
+      try{localStorage.setItem('workout-log-v1-bak',JSON.stringify(S))}catch(e){}
+      S={log:g.data.log||{},custom:Array.isArray(g.data.custom)?g.data.custom:[],updated:ru};
+      try{localStorage.setItem('workout-log-v1',JSON.stringify(S))}catch(e){}
+      render();ghStat('GitHubの新しい記録を読み込みました（'+ghTime()+'）');
+    }else if(lu>ru){await ghPut(g.sha);ghStat('同期しました（'+ghTime()+'）')}
+    else ghStat('同期済みです（'+ghTime()+'）');
+  }catch(e){ghErr(e)}
+}
+document.getElementById('ghOn').onclick=async()=>{
+  var repo=document.getElementById('ghRepo').value.trim(),tok=document.getElementById('ghTok').value.trim();
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||(!tok&&!(GH&&GH.token))){ghStat('リポジトリ（ユーザー名/リポジトリ名）とトークンを入力してください。');return}
+  GH={repo:repo,token:tok||GH.token,sha:null};ghSave();ghStat('接続しています…');
+  await ghStart();document.getElementById('ghTok').value='';ghFill();
+};
+document.getElementById('ghNow').onclick=async()=>{if(!GH){ghStat('先に接続してください。');return}ghStat('同期しています…');await ghStart()};
+document.getElementById('ghOff').onclick=()=>{GH=null;ghSave();ghFill();ghStat('連携を解除しました。GitHub上の記録は残っています。')};
+window.addEventListener('online',()=>{if(ghDirty)ghQueue()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&ghDirty&&GH){clearTimeout(ghT);ghPush()}});
+ghFill();ghStart();
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
 </script>
 </body>
