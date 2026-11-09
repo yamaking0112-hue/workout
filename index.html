@@ -132,7 +132,7 @@ main{padding-bottom:140px}
     <section class="ex"><h2>バックアップ</h2><p>記録をテキストとしてコピーし、メモアプリなどに保存してください。</p><textarea id="bk" readonly rows="5"></textarea><button class="add" id="bkCopy">コピーする</button><div class="sum" id="bkMsg"></div></section>
     <section class="ex"><h2>復元</h2><p>保存したテキストを貼り付けて読み込みます。今の記録は置き換わります。</p><textarea id="rs" rows="5" placeholder="ここに貼り付け"></textarea><button class="add" id="rsGo">読み込む</button><div class="sum" id="rsMsg"></div></section>
     <section class="ex"><h2>GitHubに自動保存</h2><p>記録を入力すると、自分のGitHubの非公開リポジトリに自動で保存します。GitHubにすでに記録がある場合は、新しいほうが読み込まれます。</p>
-      <label class="gl">リポジトリ（ユーザー名/リポジトリ名）<input id="ghRepo" placeholder="ユーザー名/workout-data" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label class="gl">リポジトリ（ユーザー名/リポジトリ名）<input id="ghRepo" inputmode="url" placeholder="ユーザー名/workout-data" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
       <label class="gl">アクセストークン<input id="ghTok" type="password" placeholder="github_pat_..." autocomplete="off" autocapitalize="off" spellcheck="false"></label>
       <button class="add" id="ghOn" style="margin-top:10px">接続する</button>
       <button class="add" id="ghNow" style="margin-top:8px">今すぐ同期</button>
@@ -457,8 +457,10 @@ async function ghStart(){
   }catch(e){ghErr(e)}
 }
 document.getElementById('ghOn').onclick=async()=>{
-  var repo=document.getElementById('ghRepo').value.trim(),tok=document.getElementById('ghTok').value.trim();
-  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||(!tok&&!(GH&&GH.token))){ghStat('リポジトリ（ユーザー名/リポジトリ名）とトークンを入力してください。');return}
+  var repo=document.getElementById('ghRepo').value.normalize('NFKC').replace(/\s/g,'').replace(/^https?:\/\/github\.com\//i,'').replace(/\.git$/i,'').replace(/\/+$/,'');
+  var tok=document.getElementById('ghTok').value.normalize('NFKC').replace(/\s/g,'');
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){ghStat('リポジトリは「ユーザー名/リポジトリ名」の形で、半角で入力してください。');return}
+  if(!tok&&!(GH&&GH.token)){ghStat('トークンを入力してください。');return}
   GH={repo:repo,token:tok||GH.token,sha:null};ghSave();ghStat('接続しています…');
   await ghStart();document.getElementById('ghTok').value='';ghFill();
 };
