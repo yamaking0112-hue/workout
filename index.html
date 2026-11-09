@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>筋トレ記録</title>
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="筋トレ記録">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eef1f4">
+<style>
+:root{--bg:#eef1f4;--card:#fff;--ink:#14202b;--sub:#5c6b78;--line:#d5dce2;--acc:#1f5fff;--accink:#fff;--warn:#c8372d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f161d;--card:#18222c;--ink:#e8eef3;--sub:#8fa0ae;--line:#2a3743;--acc:#6f9bff;--accink:#0b1220;--warn:#ff7b70;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f161d;--card:#18222c;--ink:#e8eef3;--sub:#8fa0ae;--line:#2a3743;--acc:#6f9bff;--accink:#0b1220;--warn:#ff7b70;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px 16px 48px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nav h1{font-size:18px;margin:0;text-align:center;flex:1}
+button{font:inherit;color:inherit;background:none;border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-height:44px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.today{display:block;margin:8px auto 0;border:none;color:var(--acc);font-size:14px;min-height:36px}
+.total{margin:16px 0 20px;padding:18px 16px;background:var(--ink);color:var(--bg);border-radius:14px}
+.total .big{font-size:52px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.total .big small{font-size:20px;font-weight:600;margin-left:4px;letter-spacing:0}
+.total .meta{margin-top:6px;font-size:14px;opacity:.75}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.ex header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ex h2{font-size:18px;margin:0}
+.del{border:none;color:var(--warn);font-size:14px;padding:8px}
+.prev{font-size:13px;color:var(--sub);margin:2px 0 10px}
+.set{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.set .n{width:22px;color:var(--sub);font-size:14px;text-align:center}
+.set input{width:84px;min-height:44px;font:inherit;font-size:18px;font-weight:700;text-align:center;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px}
+.set .u{color:var(--sub);font-size:14px}
+.set .x{border:none;color:var(--sub);margin-left:auto}
+.add{width:100%;border-style:dashed;color:var(--acc)}
+.new{display:flex;gap:8px;margin-top:16px}
+.new input{flex:1;min-width:0;min-height:48px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:0 12px}
+.new button{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:700}
+.empty{color:var(--sub);text-align:center;padding:24px 0}
+[hidden]{display:none!important}
+main{padding-bottom:110px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px}
+.tabs button{flex:1;border:none;border-radius:8px;min-height:40px;color:var(--sub)}
+.tabs button[aria-selected="true"]{background:var(--acc);color:var(--accink);font-weight:700}
+.sel{display:flex;gap:8px;margin-bottom:12px}
+.sel select{flex:1;min-width:0;min-height:44px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:0 8px}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+.chart svg{width:100%;height:auto;display:block}
+.g{stroke:var(--line);stroke-width:1}.t{fill:var(--sub);font-size:10px}.ln{fill:none;stroke:var(--acc);stroke-width:2.5;stroke-linejoin:round}.dt{fill:var(--acc)}.vl{fill:var(--ink);font-size:11px;font-weight:700}
+.sum{margin:10px 2px 0;font-size:15px}
+.menu h2{font-size:17px;margin:0}.menu p{margin:2px 0 8px;color:var(--sub);font-size:14px}.menu ul{margin:0 0 12px;padding-left:20px}
+.timer{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;justify-content:center;z-index:5}
+.timer #tm{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;min-width:80px;text-align:center}
+.timer button{padding:4px 9px;min-height:40px;font-size:14px}
+.ex header{flex-wrap:wrap}.ex h2{flex:1}
+.lnk{color:var(--acc)}
+.bdg{background:var(--acc);color:var(--accink);font-size:13px;font-weight:700;padding:6px 12px;border-radius:12px 12px 0 0}
+.bdg+.ex{border-top-left-radius:0;border-top-right-radius:0}
+.lk,.lkp{border-left:4px solid var(--acc)}
+.lkp{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.lk{border-top-left-radius:0;border-top-right-radius:0;border-top-style:dashed}
+.set input{width:72px}
+.pr{background:#f2b705;color:#1a1400;font-weight:800;font-size:12px;border-radius:6px;padding:1px 6px}.pr:empty{display:none}
+#list>.add{margin-bottom:8px}
+textarea{width:100%;font:13px/1.4 ui-monospace,Menlo,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0 10px}
+.new select{flex:1;min-width:0;min-height:48px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:0 8px}
+.new+.new{margin-top:8px}
+.pick{margin-top:16px}
+.pick details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:6px}
+.pick summary{min-height:44px;display:flex;align-items:center;padding:0 12px;font-weight:700;cursor:pointer;list-style:none}
+.pick summary::-webkit-details-marker{display:none}
+.pick summary::after{content:'＋';margin-left:auto;color:var(--acc)}
+.pick details[open] summary::after{content:'－'}
+.pick .chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.pick .chips button{min-height:40px;padding:4px 12px;border-radius:20px;font-size:14px}
+.pick .chips button.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+main{padding-bottom:140px}
+.timer{flex-direction:column;gap:4px}
+.tr{display:flex;gap:6px;justify-content:center;align-items:center}
+.timer button{padding:4px 8px;font-size:13px}
+#tmGo{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:700;min-width:64px}
+.set{flex-wrap:wrap;gap:6px}
+.as{min-height:44px;padding:4px 6px;font-size:12px;color:var(--sub);border-radius:8px}
+.as.on{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:700}
+.as{display:flex;align-items:center;gap:6px;flex-basis:100%;min-height:0;padding:0 0 0 28px;border-radius:0;font-size:13px;color:var(--sub)}
+.set .as input{width:56px;min-height:38px;font-size:16px}
+.regin{display:flex;gap:6px;padding:0 12px 10px}
+.regin input{flex:1;min-width:0;min-height:44px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 10px}
+.regin select{min-height:44px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:0 6px}
+.regin button{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <div class="tabs" role="tablist"><button data-t="log" aria-selected="true">記録</button><button data-t="chart" aria-selected="false">グラフ</button><button data-t="menu" aria-selected="false">メニュー</button><button data-t="data" aria-selected="false">保存</button></div>
+  <div id="vLog">
+  <div class="nav">
+    <button id="prevDay" aria-label="前の日">‹</button>
+    <h1 id="dateLabel"></h1>
+    <button id="nextDay" aria-label="次の日">›</button>
+  </div>
+  <button class="today" id="goToday">今日に戻る</button>
+  <div class="total" aria-live="polite">
+    <div class="big"><span id="vol">0</span><small>kg</small></div>
+    <div class="meta" id="meta">合計ボリューム</div>
+  </div>
+  <div id="list"></div>
+  <div id="pick" class="pick"></div>
+  <div class="pick" style="margin-top:0"><details><summary>＋ リストにない種目を登録</summary><div class="regin"><input id="cuName" placeholder="種目名" autocomplete="off"><select id="cuPart" aria-label="部位"><option>胸</option><option>背中</option><option>肩</option><option>腕</option><option>脚</option><option>体幹</option><option>その他</option></select><button id="cuAdd">登録</button></div><div class="chips" id="cuList"></div></details></div>
+  <div class="new">
+    <input id="name" list="names" placeholder="種目名（例：ベンチプレス）" autocomplete="off">
+    <datalist id="names"></datalist>
+    <button id="addEx">種目を追加</button>
+  </div>
+  </div>
+  <div id="vChart" hidden>
+    <div class="sel"><select id="cEx" aria-label="種目"></select><select id="cMet" aria-label="指標"><option value="max">最大重量</option><option value="e1rm">推定1RM</option><option value="vol">ボリューム</option></select></div>
+    <div class="chart" id="cBox"></div>
+    <div class="sum" id="cSum"></div>
+  </div>
+  <div id="vMenu" class="menu" hidden></div>
+  <div id="vData" class="menu" hidden>
+    <section class="ex"><h2>バックアップ</h2><p>記録をテキストとしてコピーし、メモアプリなどに保存してください。</p><textarea id="bk" readonly rows="5"></textarea><button class="add" id="bkCopy">コピーする</button><div class="sum" id="bkMsg"></div></section>
+    <section class="ex"><h2>復元</h2><p>保存したテキストを貼り付けて読み込みます。今の記録は置き換わります。</p><textarea id="rs" rows="5" placeholder="ここに貼り付け"></textarea><button class="add" id="rsGo">読み込む</button><div class="sum" id="rsMsg"></div></section>
+  </div>
+</main>
+<div class="timer" id="timer">
+  <div class="tr"><button id="tmGo" data-go="1">開始</button><button data-adj="-15">−15</button><button data-adj="-5">−5</button><span id="tm" aria-live="polite">1:30</span><button data-adj="5">＋5</button><button data-adj="15">＋15</button></div>
+  <div class="tr"><button data-s="30">30秒</button><button data-s="60">60秒</button><button data-s="90">90秒</button><button data-s="120">2分</button><button data-s="180">3分</button><button id="tmStop">リセット</button></div>
+</div>
+<script>
+var S={log:{}};
+try{var r=localStorage.getItem('workout-log-v1');if(r)S=JSON.parse(r)}catch(e){}
+function save(){try{localStorage.setItem('workout-log-v1',JSON.stringify(S))}catch(e){}}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+var cur=ymd(new Date()),pend=null;
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function shift(n){var d=new Date(cur+'T00:00:00');d.setDate(d.getDate()+n);cur=ymd(d);render()}
+function prevSession(name){
+  var keys=Object.keys(S.log).sort().reverse();
+  for(var i=0;i<keys.length;i++){
+    if(keys[i]>=cur)continue;
+    var list=S.log[keys[i]];
+    for(var j=0;j<list.length;j++){
+      if(list[j].name===name&&list[j].sets.length)return {date:keys[i],sets:list[j].sets};
+    }
+  }
+  return null;
+}
+function calc(){
+  var v=0,n=0;(S.log[cur]||[]).forEach(function(e){e.sets.forEach(function(s){
+    var w=parseFloat(s.w),r=parseInt(s.r,10);
+    if(w>0&&r>0){v+=w*r;n++}
+  })});
+  document.getElementById('vol').textContent=Math.round(v).toLocaleString('ja-JP');
+  document.getElementById('meta').textContent='合計ボリューム ／ '+n+'セット'+updPR();
+}
+function render(){
+  var d=new Date(cur+'T00:00:00');
+  document.getElementById('dateLabel').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（'+'日月火水木金土'[d.getDay()]+'）';
+  var ex=S.log[cur]||[];
+  var h='';
+  if(!ex.length)h=copyBtn()+'<div class="empty">種目を追加して、最初のセットを記録しましょう。</div>';
+  ex.forEach(function(e,i){
+    var p=prevSession(e.name),ptxt='前回の記録なし';
+    if(p){var m=p.date.split('-');ptxt='前回（'+parseInt(m[1],10)+'/'+parseInt(m[2],10)+'）：'+p.sets.map(function(s){return (s.w||0)+'kg×'+(s.r||0)+(acn(s)?'(補助'+acn(s)+')':'')}).join('、')}
+    var nx=ex[i+1],cls='ex'+(e.link?' lk':'')+(nx&&nx.link?' lkp':''),bdg='';
+    if(!e.link&&nx&&nx.link){var gn=1;while(ex[i+gn]&&ex[i+gn].link)gn++;bdg='<div class="bdg">'+(gn===2?'スーパーセット':'ジャイアントセット（'+gn+'種目）')+'：続けて行い、1周したら休憩</div>'}
+    h+=bdg+'<section class="'+cls+'"><header><h2>'+esc(e.name)+'</h2>'+(i>0?'<button class="del lnk" data-a="link" data-i="'+i+'">'+(e.link?'つなぎ解除':'前とつなぐ')+'</button>':'')+'<button class="del" data-a="delex" data-i="'+i+'">'+(pend===cur+i?'本当に削除':'種目を削除')+'</button></header><div class="prev">'+esc(ptxt)+'</div>';
+    e.sets.forEach(function(s,j){
+      h+='<div class="set"><span class="n">'+(j+1)+'</span><input inputmode="decimal" aria-label="重量" data-a="w" data-i="'+i+'" data-j="'+j+'" value="'+esc(s.w)+'"><span class="u">kg</span><span class="u">×</span><input inputmode="numeric" aria-label="回数" data-a="r" data-i="'+i+'" data-j="'+j+'" value="'+esc(s.r)+'"><span class="u">回</span><span class="pr" data-pr="'+i+'-'+j+'"></span><button class="x" data-a="delset" data-i="'+i+'" data-j="'+j+'" aria-label="セットを削除">✕</button><label class="as">補助あり<input inputmode="numeric" aria-label="補助した回数" data-a="ac" data-i="'+i+'" data-j="'+j+'" value="'+esc(s.ac!==undefined?s.ac:(s.a?s.r:''))+'">回</label></div>';
+    });
+    h+='<button class="add" data-a="addset" data-i="'+i+'">セットを追加</button></section>';
+  });
+  document.getElementById('list').innerHTML=h;
+  var all={};Object.keys(S.log).forEach(function(k){S.log[k].forEach(function(e){all[e.name]=1})});
+  document.getElementById('names').innerHTML=Object.keys(all).map(function(n){return '<option value="'+esc(n)+'">'}).join('');
+  calc();
+}
+document.getElementById('prevDay').onclick=function(){shift(-1)};
+document.getElementById('nextDay').onclick=function(){shift(1)};
+document.getElementById('goToday').onclick=function(){cur=ymd(new Date());render()};
+function addEx(){
+  var el=document.getElementById('name'),name=el.value.trim();
+  if(!name){el.focus();return}
+  if(!S.log[cur])S.log[cur]=[];
+  var p=prevSession(name),first=p?p.sets[p.sets.length-1]:{w:'',r:''};
+  S.log[cur].push({name:name,sets:[{w:first.w,r:first.r}]});
+  el.value='';save();render();
+}
+document.getElementById('addEx').onclick=addEx;
+document.getElementById('name').addEventListener('keydown',function(e){if(e.key==='Enter')addEx()});
+document.getElementById('list').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var a=b.dataset.a,i=+b.dataset.i,j=+b.dataset.j,ex=S.log[cur];
+  if(a!=='delex')pend=null;
+  if(a==='delex'){if(pend!==cur+i){pend=cur+i;render();return}pend=null;ex.splice(i,1);if(ex[0])ex[0].link=false;if(!ex.length)delete S.log[cur]}
+  else if(a==='delset'){ex[i].sets.splice(j,1)}
+  else if(a==='link'){ex[i].link=!ex[i].link}
+  else if(a==='copyday'){var k=lastDay();if(!k)return;S.log[cur]=S.log[k].map(e=>({name:e.name,link:!!e.link,sets:e.sets.map(s=>({w:s.w,r:s.r}))}))}
+  else if(a==='addset'){
+    var sets=ex[i].sets,last=sets[sets.length-1];
+    if(!last){var p=prevSession(ex[i].name);last=p?p.sets[p.sets.length-1]:{w:'',r:''}}
+    sets.push({w:last.w,r:last.r});
+  } else return;
+  save();render();
+});
+document.getElementById('list').addEventListener('input',function(e){
+  var t=e.target,a=t.dataset.a;if(a!=='w'&&a!=='r'&&a!=='ac')return;
+  S.log[cur][+t.dataset.i].sets[+t.dataset.j][a]=t.value;if(a==='ac')delete S.log[cur][+t.dataset.i].sets[+t.dataset.j].a;save();calc();
+});
+var tabs={log:'vLog',chart:'vChart',menu:'vMenu',data:'vData'};
+function showTab(t){
+  Object.keys(tabs).forEach(k=>{document.getElementById(tabs[k]).hidden=k!==t;document.querySelector(`[data-t='${k}']`).setAttribute('aria-selected',String(k===t))});
+  if(t==='chart')drawChart();if(t==='data')fillBk();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.tabs button').forEach(b=>{b.onclick=()=>showTab(b.dataset.t)});
+function addNames(list,link){
+  if(!S.log[cur])S.log[cur]=[];
+  var have={};S.log[cur].forEach(e=>{have[e.name]=1});
+  var added=false;list.forEach((n,k)=>{if(have[n]){added=false;return}var p=prevSession(n),f=p?p.sets[p.sets.length-1]:{w:'',r:''};S.log[cur].push({name:n,link:!!link&&k>0&&added,sets:[{w:f.w,r:f.r}]});added=true});
+  save();render();showTab('log');
+}
+var MENUS=[
+{t:'プッシュ（胸・肩・三頭）',n:['ベンチプレス','インクラインダンベルプレス','ショルダープレス','サイドレイズ','トライセプスプッシュダウン']},
+{t:'プル（背中・二頭）',n:['デッドリフト','ラットプルダウン','ベントオーバーロウ','シーテッドロウ','ダンベルカール']},
+{t:'レッグ（脚）',n:['スクワット','レッグプレス','ルーマニアンデッドリフト','レッグカール','カーフレイズ']},
+{t:'全身（初心者向け）',n:['スクワット','ベンチプレス','ラットプルダウン','ショルダープレス','ダンベルロウ']},
+{t:'スーパーセット例（胸×背中）',link:true,n:['ベンチプレス','ベントオーバーロウ']},
+{t:'スーパーセット例（二頭×三頭）',link:true,n:['ダンベルカール','トライセプスプッシュダウン']},
+{t:'ジャイアントセット例（肩）',link:true,n:['ショルダープレス','サイドレイズ','リアレイズ']}];
+document.getElementById('vMenu').innerHTML=`<p>3分割なら、プッシュ・プル・レッグを週3回ローテーションします。</p>`+MENUS.map((m,i)=>`<section class='ex'><h2>${m.t}</h2>${m.link?'<p>つないだ状態で追加されます。1周ごとに休憩します。</p>':''}<p>目安は各種目3セット × 8〜12回</p><ul>${m.n.map(n=>`<li>${n}</li>`).join('')}</ul><button class='add' data-m='${i}'>表示中の日の記録に追加</button></section>`).join('');
+document.getElementById('vMenu').addEventListener('click',e=>{var b=e.target.closest('button');if(b)addNames(MENUS[+b.dataset.m].n,MENUS[+b.dataset.m].link)});
+function drawChart(){
+  var names={};
+  Object.keys(S.log).forEach(k=>S.log[k].forEach(e=>{if(e.sets.length)names[e.name]=1}));
+  var sel=document.getElementById('cEx'),old=sel.value,list=Object.keys(names),box=document.getElementById('cBox'),sum=document.getElementById('cSum');
+  sel.innerHTML=list.map(n=>`<option>${esc(n)}</option>`).join('');
+  if(list.indexOf(old)>=0)sel.value=old;
+  sum.textContent='';
+  var m=document.getElementById('cMet').value,pts=[];
+  Object.keys(S.log).sort().forEach(k=>S.log[k].forEach(e=>{
+    if(e.name!==sel.value)return;
+    var v=0;
+    e.sets.forEach(s=>{var w=parseFloat(s.w),r=parseInt(s.r,10);if(!(w>0&&r>0))return;if(m!=='vol'){r-=acn(s);if(r<1)return}
+      if(m==='vol')v+=w*r;else v=Math.max(v,m==='max'?w:w*(1+r/30))});
+    if(v>0)pts.push({k:k,v:Math.round(v*10)/10});
+  }));
+  if(!pts.length){box.innerHTML=`<div class='empty'>${list.length?'この種目の重量と回数を入力すると表示されます。':'記録するとここにグラフが表示されます。'}</div>`;return}
+  var W=340,H=210,L=44,R=14,T=22,B=26,vs=pts.map(p=>p.v),lo=Math.min(...vs),hi=Math.max(...vs);
+  if(lo===hi){lo*=0.9;hi*=1.1}else{var pd=(hi-lo)*0.15;lo=Math.max(0,lo-pd);hi+=pd}
+  var X=i=>pts.length===1?(L+W-R)/2:L+(W-L-R)*i/(pts.length-1),Y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
+  var g='';
+  for(var i=0;i<3;i++){var gv=lo+(hi-lo)*i/2,gy=Y(gv);g+=`<line class='g' x1='${L}' x2='${W-R}' y1='${gy}' y2='${gy}'/><text class='t' x='${L-6}' y='${gy+3}' text-anchor='end'>${Math.round(gv)}</text>`}
+  var d=s=>{var a=s.split('-');return (+a[1])+'/'+(+a[2])};
+  var last=pts.length-1;
+  var line=last>0?`<polyline class='ln' points='${pts.map((p,i)=>X(i)+','+Y(p.v)).join(' ')}'/>`:'';
+  var dots=pts.map((p,i)=>`<circle class='dt' cx='${X(i)}' cy='${Y(p.v)}' r='4'/>`).join('');
+  var lab=`<text class='vl' x='${X(last)}' y='${Y(pts[last].v)-9}' text-anchor='end'>${pts[last].v}</text>`;
+  var xl=`<text class='t' x='${X(0)}' y='${H-6}' text-anchor='start'>${d(pts[0].k)}</text>`+(last>0?`<text class='t' x='${X(last)}' y='${H-6}' text-anchor='end'>${d(pts[last].k)}</text>`:'');
+  box.innerHTML=`<svg viewBox='0 0 ${W} ${H}' role='img' aria-label='成長グラフ'>${g}${line}${dots}${lab}${xl}</svg>`;
+  var df=Math.round((pts[last].v-pts[0].v)*10)/10;
+  sum.textContent=last>0?`初回 ${pts[0].v} → 最新 ${pts[last].v}kg（${df>=0?'+':''}${df}kg）`:'記録は1回分です。次の記録から推移が表示されます。';
+}
+document.getElementById('cEx').onchange=drawChart;
+document.getElementById('cMet').onchange=drawChart;
+function lastDay(){var ks=Object.keys(S.log).sort().reverse();for(var i=0;i<ks.length;i++)if(ks[i]<cur&&S.log[ks[i]].length)return ks[i];return null}
+function copyBtn(){var k=lastDay();if(!k)return '';var m=k.split('-');return `<button class='add' data-a='copyday'>前回（${+m[1]}/${+m[2]}）のメニューをコピー</button>`}
+function prMap(){
+  var best={},out={};
+  Object.keys(S.log).sort().forEach(k=>{
+    if(k>cur)return;
+    S.log[k].forEach((e,i)=>e.sets.forEach((s,j)=>{
+      var w=parseFloat(s.w),r=parseInt(s.r,10);if(!(w>0&&r>0))return;r-=acn(s);if(r<1)return;
+      var o=w*(1+r/30),b=best[e.name];
+      if(!b){best[e.name]={w:w,o:o};return}
+      var t=w>b.w?'w':o>b.o?'o':'';
+      if(t&&k===cur)out[i+'-'+j]=t;
+      if(w>b.w)b.w=w;if(o>b.o)b.o=o;
+    }));
+  });
+  return out;
+}
+function acn(s){var v=s.ac!==undefined&&s.ac!==''?parseInt(s.ac,10):(s.a?parseInt(s.r,10):0);return v>0?v:0}
+function updPR(){
+  var m=prMap();
+  document.querySelectorAll('[data-pr]').forEach(el=>{var t=m[el.dataset.pr];el.textContent=t?'PR':'';el.title=t==='w'?'重量の自己ベスト':t?'推定1RMの自己ベスト':''});
+  var c=Object.keys(m).length;
+  return c?' ／ 自己ベスト '+c+'件':'';
+}
+function fillBk(){document.getElementById('bk').value=JSON.stringify(S)}
+document.getElementById('bkCopy').onclick=()=>{
+  var t=document.getElementById('bk'),m=document.getElementById('bkMsg');
+  var ok=()=>{m.textContent='コピーしました。メモアプリなどに貼り付けて保存してください。'};
+  var ng=()=>{t.select();m.textContent='自動でコピーできませんでした。上のテキストを全選択してコピーしてください。'};
+  try{t.select();if(document.execCommand('copy')){ok();return}}catch(e){}
+  if(navigator.clipboard)navigator.clipboard.writeText(t.value).then(ok,ng);else ng();
+};
+var rsArm=false;
+document.getElementById('rs').addEventListener('input',()=>{rsArm=false;document.getElementById('rsGo').textContent='読み込む'});
+document.getElementById('rsGo').onclick=()=>{
+  var b=document.getElementById('rsGo'),m=document.getElementById('rsMsg'),v;
+  try{v=JSON.parse(document.getElementById('rs').value)}catch(e){}
+  if(!v||!v.log||typeof v.log!=='object'){rsArm=false;b.textContent='読み込む';m.textContent='読み込めませんでした。バックアップのテキストをそのまま貼り付けてください。';return}
+  if(!rsArm){rsArm=true;b.textContent='本当に置き換える';m.textContent='今の記録は置き換わります。もう一度押すと実行します。';return}
+  S={log:v.log,custom:Array.isArray(v.custom)?v.custom:[]};save();rsArm=false;b.textContent='読み込む';
+  m.textContent='読み込みました（'+Object.keys(S.log).length+'日分）。';render();
+};
+var LIB=[['胸',['ベンチプレス','インクラインベンチプレス','ダンベルプレス','インクラインダンベルプレス','ダンベルフライ','ケーブルクロスオーバー','チェストプレス','ディップス','腕立て伏せ']],
+['背中',['デッドリフト','懸垂','ラットプルダウン','ベントオーバーロウ','ワンハンドダンベルロウ','シーテッドロウ','Tバーロウ','ハイパーエクステンション']],
+['肩',['ショルダープレス','サイドレイズ','フロントレイズ','リアレイズ','アーノルドプレス','アップライトロウ','フェイスプル']],
+['腕',['バーベルカール','ダンベルカール','ハンマーカール','トライセプスプッシュダウン','フレンチプレス','ライイングトライセプスエクステンション']],
+['脚',['スクワット','フロントスクワット','レッグプレス','ブルガリアンスクワット','ランジ','ルーマニアンデッドリフト','レッグエクステンション','レッグカール','ヒップスラスト','カーフレイズ']],
+['体幹',['クランチ','レッグレイズ','アブローラー']]];
+S.custom=S.custom||[];
+function allParts(){
+  var p=LIB.map(g=>[g[0],g[1].concat(S.custom.filter(c=>c.part===g[0]).map(c=>c.name))]);
+  var o=S.custom.filter(c=>c.part==='その他').map(c=>c.name);
+  if(o.length)p.push(['その他',o]);
+  return p;
+}
+function fillCu(){document.getElementById('cuList').innerHTML=S.custom.map((c,i)=>`<button data-d='${i}'>${esc(c.name)}（${esc(c.part)}）✕</button>`).join('')}
+document.getElementById('cuAdd').onclick=()=>{
+  var el=document.getElementById('cuName'),n=el.value.trim(),p=document.getElementById('cuPart').value;
+  if(!n){el.focus();return}
+  var dup=false;LIB.forEach(g=>{if(g[1].indexOf(n)>=0)dup=true});S.custom.forEach(c=>{if(c.name===n)dup=true});
+  if(!dup)S.custom.push({part:p,name:n});
+  el.value='';save();openG[p]=true;fillPick();fillCu();
+};
+document.getElementById('cuList').addEventListener('click',e=>{var b=e.target.closest('button');if(!b)return;S.custom.splice(+b.dataset.d,1);save();fillPick();fillCu()});
+var openG={};
+function fillPick(){
+  var used={},rec=[],have={};
+  (S.log[cur]||[]).forEach(e=>{have[e.name]=1});
+  Object.keys(S.log).sort().reverse().forEach(k=>S.log[k].forEach(e=>{if(!used[e.name]){used[e.name]=1;rec.push(e.name)}}));
+  var groups=[];
+  if(rec.length)groups.push(['最近使った種目',rec.slice(0,12)]);
+  document.getElementById('pick').innerHTML=groups.concat(allParts()).map(g=>`<details data-g='${g[0]}'${openG[g[0]]?' open':''}><summary>${g[0]}</summary><div class='chips'>${g[1].map(n=>`<button class='${have[n]?'on':''}' data-n='${esc(n)}'>${have[n]?'✓ ':''}${esc(n)}</button>`).join('')}</div></details>`).join('');
+}
+var pk=document.getElementById('pick');
+pk.addEventListener('toggle',e=>{if(e.target.dataset&&e.target.dataset.g)openG[e.target.dataset.g]=e.target.open},true);
+pk.addEventListener('click',e=>{var b=e.target.closest('button');if(!b||!b.dataset.n)return;var y=window.scrollY;addNames([b.dataset.n]);window.scrollTo(0,y)});
+var _render=render;render=function(){_render();fillPick();fillCu()};
+var tEnd=0,tInt=null,ac=null,tLeft=0,dur=90;
+try{var dv=parseInt(localStorage.getItem('workout-rest'),10);if(dv>=5)dur=dv}catch(e){}
+function sv(){try{localStorage.setItem('workout-rest',String(dur))}catch(e){}}
+function tShow(){var l=tInt?Math.max(0,Math.ceil((tEnd-Date.now())/1000)):(tLeft||dur);document.getElementById('tm').textContent=fmt(l)}
+function setGo(){document.getElementById('tmGo').textContent=alarm?'停止':tInt?'一時停止':(tLeft?'再開':'開始')}
+var _stop=stopT;stopT=function(d){_stop(d);setGo()};
+function mkWav(){
+  var sr=22050,n=Math.floor(sr*1.8),buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+  var w=(o,s)=>{for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(var i=0;i<n;i++){var t=i/sr,ph=t%0.6,a=ph<0.35?Math.sin(Math.PI*ph/0.35):0;v.setInt16(44+i*2,Math.sin(2*Math.PI*988*t)*a*0.9*32767,true)}
+  var b='',u=new Uint8Array(buf);for(var k=0;k<u.length;k+=8192)b+=String.fromCharCode.apply(null,u.subarray(k,k+8192));
+  return 'data:audio/wav;base64,'+btoa(b);
+}
+var beepEl=null,alarm=false;
+function stopAlarm(){alarm=false;try{if(beepEl){beepEl.pause();beepEl.loop=false;beepEl.currentTime=0}}catch(e){}}
+function getEl(){if(!beepEl){beepEl=new Audio(mkWav());beepEl.preload='auto'}return beepEl}
+function unlockA(){try{var el=getEl();el.muted=true;var p=el.play();if(p&&p.then)p.then(()=>{el.pause();el.currentTime=0;el.muted=false}).catch(()=>{el.muted=false})}catch(e){}}
+var wbeep=beep;
+beep=function(){try{var el=getEl();el.muted=false;el.loop=true;alarm=true;el.currentTime=0;var p=el.play();if(p&&p.catch)p.catch(()=>{wbeep()})}catch(e){wbeep()}};
+var _start=startT;startT=function(s){unlockA();_start(s)};
+tShow();setGo();
+function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function tick(){var left=Math.ceil((tEnd-Date.now())/1000);if(left<=0){stopT(true);return}document.getElementById('tm').textContent=fmt(left)}
+function beep(){try{if(!ac)return;var o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.value=0.15;o.start();o.stop(ac.currentTime+0.5)}catch(e){}}
+function startT(s){
+  try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.resume)ac.resume()}catch(e){}
+  tEnd=Date.now()+s*1000;clearInterval(tInt);tInt=setInterval(tick,250);tick();
+}
+function stopT(done){
+  clearInterval(tInt);tInt=null;
+  document.getElementById('tm').textContent=done?'休憩終了':'0:00';
+  if(done){beep();try{if(navigator.vibrate)navigator.vibrate([300,150,300])}catch(e){}}
+}
+document.getElementById('timer').addEventListener('click',e=>{var b=e.target.closest('button');if(!b)return;if(alarm){stopAlarm();if(b.dataset.go){tShow();setGo();return}}
+  var s=b.dataset.s,adj=b.dataset.adj;
+  if(s){dur=+s;sv();tLeft=0;startT(dur)}
+  else if(adj){var a=+adj;
+    if(tInt){tEnd=Math.max(Date.now()+1000,tEnd+a*1000);tick()}
+    else if(tLeft){tLeft=Math.min(3600,Math.max(5,tLeft+a))}
+    else{dur=Math.min(3600,Math.max(5,dur+a));sv()}}
+  else if(b.dataset.go){
+    if(tInt){tLeft=Math.max(1,Math.ceil((tEnd-Date.now())/1000));clearInterval(tInt);tInt=null}
+    else{startT(tLeft||dur);tLeft=0}}
+  else{stopT(false);tLeft=0}
+  tShow();setGo()});
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+</script>
+</body>
+</html>
